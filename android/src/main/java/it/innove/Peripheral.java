@@ -36,6 +36,8 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import java.nio.ByteBuffer;
+
 import static android.os.Build.VERSION_CODES.LOLLIPOP;
 import static com.facebook.react.common.ReactConstants.TAG;
 
@@ -204,6 +206,20 @@ public class Peripheral extends BluetoothGattCallback {
 							len -= 1;
 						}
 						advertising.putMap("manufacturerData", byteArrayToWritableMap(mData));
+						break;
+
+					case 0x07:
+						int c = 0;
+						byte[] sUuid = new byte[16];
+						while (c < 16) {
+							sUuid[c] = advertisedData[offset + c];
+							c++;
+						}
+						offset += 16;
+						WritableArray servicesArray = Arguments.createArray();
+						UUID uuid = UUID.nameUUIDFromBytes(sUuid);
+						servicesArray.pushString(uuid.toString());
+						advertising.putArray("serviceUUIDs", servicesArray);
 						break;
 
 					default:
